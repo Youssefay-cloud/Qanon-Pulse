@@ -21,8 +21,8 @@ laws_df = df[['law_number', 'year', 'title', 'category', 'status', 'issue_date']
 laws_df
 
 
-# 1. First, explode the lists so each dict gets its own row
-df_exploded = df.explode('articles')
+# 1. First, explode the lists so each dict gets its own row and drop the NAN articles
+df_exploded = df.explode('articles').dropna(subset=['articles'])
 
 # 2. Now, extract the dictionary keys ('article_number' and 'content') into separate columns.
 # We use pd.json_normalize for this, which is perfect for dictionaries.
