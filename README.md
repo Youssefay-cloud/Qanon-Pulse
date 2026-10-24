@@ -19,28 +19,26 @@ the command to use the script is
 3. ingest data to the database
 4. Dockrize the ingestion file
 
+Need to Fix the Schema \
+Start the Transformation
+
 
 ---
 
 ### problems Fixed :
-1. Drop empty articles 
-2. 
+1. Drop empty articles
+2. sqlalchemy.exc.NoSuchModuleError: Can't load plugin: sqlalchemy.dialects:postgresql.psycopg
+3. 
 
 
 
 ### problems:
 
-1. sqlalchemy.exc.NoSuchModuleError: Can't load plugin: sqlalchemy.dialects:postgresql.psycopg
-
-
-
-
 Smaller things to fix in the ingestion file:
 
-**Drop empty articles before normalizing**. Laws with an empty articles list explode to NaN, and json_normalize will choke on that. Use df.explode('articles').dropna(subset=['articles']). 
-Your current dropna(subset=['content']) runs too late.
+**Move secrets and paths out of the code**. Read the password and path from 
+environment variables (or a .env file), because root:yoyo and a Desktop path make the script neither universal nor safe to commit. In a raw stringr"C:\\Users..." also keeps the double backslashes literally. Use r"C:\Users..." or pathlib.
 
-**Move secrets and paths out of the code**. Read the password and path from environment variables (or a .env file), because root:yoyo and a Desktop path make the script neither universal nor safe to commit. In a raw string, r"C:\\Users..." also keeps the double backslashes literally. Use r"C:\Users..." or pathlib.
 
 **Wrap it in a main()** function with the path as an argument. That’s the cheapest step toward “universal” and makes it callable from Airflow later.
 
