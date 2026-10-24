@@ -1,0 +1,27 @@
+[project]
+name = "qanun-pulse"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Youssef Ayman", email = "youssefay578@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "pandas>=3.0.6",
+    "pip>=26.2.2",
+    "psycopg2-binary>=2.9.13",
+    "sqlalchemy>=2.1.6",
+]
+
+[project.scripts]
+qanun-pulse = "qanun_pulse:main"
+
+[build-system]
+requires = ["uv_build>=<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+]
