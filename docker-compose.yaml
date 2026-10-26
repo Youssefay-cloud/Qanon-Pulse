@@ -40,7 +40,15 @@ services:
     depends_on:
       - db
     restart: on-failure  # <--- Added this so it retries if DB isn't ready yet
-
+  
+  transform:
+    build: 
+      context: .
+      dockerfile: transform/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://root:yoyo@db:5432/qanon_db
+    depends_on:
+      - db
 # Clean, default volumes
 volumes:
   postgres_data:

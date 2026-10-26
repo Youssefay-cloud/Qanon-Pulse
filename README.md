@@ -18,8 +18,8 @@ the command to use the script is
 2. reshaping data 
 3. ingest data to the database
 4. Dockrize the ingestion file
+5. 
 
-Need to Fix the Schema \
 Start the Transformation
 
 
@@ -28,7 +28,7 @@ Start the Transformation
 ### problems Fixed :
 1. Drop empty articles
 2. sqlalchemy.exc.NoSuchModuleError: Can't load plugin: sqlalchemy.dialects:postgresql.psycopg
-3. 
+3. Fixed schema
 
 
 
