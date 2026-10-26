@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS laws (
     title TEXT,
     category TEXT,
     status TEXT,
-    issue_date DATE,
+    issue_date TEXT, 
     PRIMARY KEY (law_number, year)
 );
 CREATE TABLE IF NOT EXISTS articles (
