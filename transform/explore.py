@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from sqlalchemy import create_engine
+from transform.arabic_text import normalize
 
 engine = create_engine(os.environ["DATABASE_URL"])
 
@@ -24,3 +25,4 @@ print(articles.groupby("law_number")["n_words"].describe())
 for text in articles["content"].sample(5, random_state=1):
     print("------")
     print(text[:300])
+
