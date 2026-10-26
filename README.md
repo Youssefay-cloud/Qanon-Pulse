@@ -11,6 +11,12 @@ the command to use the script is
 
 `python reshaping_data/reshape.py data/laws_structured.json data/reshaped_laws.json`
 
+
+After exploring the data and what are it is wrong and what is missing we started in data normalization we use pytest to check the code 
+works or not 
+
+run the tests using ```uv run pytest``` in the Terminal
+
 ---
 
 ### Finished
@@ -18,7 +24,9 @@ the command to use the script is
 2. reshaping data 
 3. ingest data to the database
 4. Dockrize the ingestion file
-5. 
+5. Data Exploration
+5. Data Normalization
+
 
 Start the Transformation
 
@@ -42,5 +50,24 @@ environment variables (or a .env file), because root:yoyo and a Desktop path mak
 
 **Wrap it in a main()** function with the path as an argument. That’s the cheapest step toward “universal” and makes it callable from Airflow later.
 
+ RAW: ٢ الجریدة الرسمیة – العدد ١٨ (تابع) فى ٣ مایو سنة ٢٠٢٥
+transform-1         | قانون رقم ١٤ لسنة ٢٠٢٥
+transform-1         | بإصدار قانون العمل
+transform-1         | باسم الشعب
+transform-1         | رئيس الجمهورية
+transform-1         | قرر مجلس النواب القانون الآتى نصه ، وقد أصدرناه :
+transform-1         | ( المادة الأولى )
+transform-1         | يعمل بأحك
+transform-1         | CLEAN: 2 الجريدة الرسمية – العدد 18 (تابع) فى 3 مايو سنة 2025 قانون رقم 14 لسنة 2025 باصدار قانون العمل باسم الشعب رئيس الجمهورية قرر مجلس النواب القانون الاتى نصه ، وقد اصدرناه : ( المادة الاولى ) يعمل باحك
 
 
+
+transform-1         | ٢ الجریدة الرسمیة – العدد ١٨ (تابع) فى ٣ مایو سنة ٢٠٢٥
+transform-1         | قانون رقم ١٤ لسنة ٢٠٢٥
+transform-1         | بإصدار قانون العمل
+transform-1         | باسم الشعب
+transform-1         | رئيس الجمهورية
+transform-1         | قرر مجلس النواب القانون الآتى نصه ، وقد أصدرناه :
+transform-1         | ( المادة الأولى )
+transform-1         | يعمل بأحك
+transform-1         | 2 الجريدة الرسمية – العدد 18 (تابع) فى 3 مايو سنة 2025 قانون رقم 14 لسنة 2025 باصدار قانون العمل باسم الشعب رئيس الجمهورية قرر مجلس النواب القانون الاتى نصه ، وقد اصدرناه : ( المادة الاولى ) يعمل باحك
