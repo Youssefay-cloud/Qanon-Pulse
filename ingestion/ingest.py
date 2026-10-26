@@ -1,5 +1,5 @@
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import os
 
 
@@ -18,7 +18,6 @@ engine = create_engine(db_url)
 
 
 laws_df = df[['law_number', 'year', 'title', 'category', 'status', 'issue_date']].copy()
-laws_df
 
 
 # 1. First, explode the lists so each dict gets its own row and drop the NAN articles
@@ -28,33 +27,50 @@ df_exploded = df.explode('articles').dropna(subset=['articles'])
 # We use pd.json_normalize for this, which is perfect for dictionaries.
 articles_df = pd.json_normalize(df_exploded['articles'])
 
-# 3. Add the 'law_number' back to the articles_df so we can link them in the database.
+# 3. Add the 'law_number' AND 'year' back to the articles_df so we can link them in the database.
+# Law numbers repeat across years (Law 12 of 2003 vs Law 12 of 2010), so both are needed.
 # Because we exploded, the index of articles_df perfectly matches the index of df_exploded.
 articles_df['law_number'] = df_exploded['law_number'].values
+articles_df['year'] = df_exploded['year'].values
 
-# 4. Reorder and rename columns to match our database schema
-# We drop any rows where 'articles' might have been NaN (empty lists)
+# 4. Drop any article rows that have no content
 articles_df = articles_df.dropna(subset=['content'])
 
 
 
-print(pd.io.sql.get_schema(laws_df, name='laws_data', con=engine))
-print(pd.io.sql.get_schema(articles_df, name='articles_data', con=engine))
-
-laws_df.head(n=0).to_sql(name='laws_data', con=engine, if_exists='replace')
-articles_df.head(n=0).to_sql(name='articles_data', con=engine, if_exists='replace')
-
+# Explicit schema: primary keys + a foreign key, instead of letting pandas guess
+DDL = """
+CREATE TABLE IF NOT EXISTS laws (
+    law_number INT NOT NULL,
+    year INT NOT NULL,
+    title TEXT,
+    category TEXT,
+    status TEXT,
+    issue_date DATE,
+    PRIMARY KEY (law_number, year)
+);
+CREATE TABLE IF NOT EXISTS articles (
+    law_number INT NOT NULL,
+    year INT NOT NULL,
+    article_number TEXT NOT NULL,
+    content TEXT NOT NULL,
+    PRIMARY KEY (law_number, year, article_number),
+    FOREIGN KEY (law_number, year) REFERENCES laws (law_number, year)
+);
+"""
 
 print("Inserting data...")
 with engine.begin() as connection:
-    # IMPORTANT: You MUST insert 'laws' first. 
-    # If you insert articles first, the database will reject them because 
-    # their law_number doesn't exist in the laws table yet!
-    
-    laws_df.to_sql('laws_data', connection, if_exists='append', index=False)
+    connection.execute(text(DDL))
+
+    # Wipe and reload so re-running the script never creates duplicates
+    connection.execute(text("TRUNCATE articles, laws"))
+
+    # Laws first: the foreign key requires the law to exist before its articles
+    laws_df.to_sql('laws', connection, if_exists='append', index=False)
     print(f"✅ Inserted {len(laws_df)} laws.")
-    
-    articles_df.to_sql('articles_data', connection, if_exists='append', index=False)
+
+    articles_df.to_sql('articles', connection, if_exists='append', index=False)
     print(f"✅ Inserted {len(articles_df)} articles.")
 
 print("🎉 Database ingestion complete!")
