@@ -1,51 +1,79 @@
-# Docker-compose to intialize the postgreSQL and Pgadmin 
-`docker compose up -d ` Then you can use the pgadmin to interact with the database 
-there is init.sql to create the schema if there isn't one and we took care of data we need to persist using volumes 
-
-I deleted the init.sql because we have the data and well create the dtypes using pandas and then we will connect to the database using sqlalchemy.
+# Qanon pulse 
+Qanon pulse collects the text of Egyption laws, cleans and normalizes the Arabic text, and computes simple, explainable metrics: how long articles are, how dense the sentences are, which laws change most, and which legal terms appear for the first time. Results are meant to be explored in an interactive dashboard.
 
 
 
-### Script for reshaping the missed arabic text in /reshaping_data
-the command to use the script is 
 
-`python reshaping_data/reshape.py data/laws_structured.json data/reshaped_laws.json`
+## Install
+ 
+### Requirements
+ 
+- Docker and Docker Compose v2
+- Git
+- Python 3.13 and uv
+### Setup
+ 
+```bash
+git clone https://github.com/Youssefay-cloud/Qanon-Pulse.git
+cd Qanon-Pulse
+```
 
+## Usage
+ 
+Start the whole local stack (database, pgAdmin, ingestion, transform):
+ 
+```bash
+docker compose up --build
+```
+ 
+What happens, in order:
+ 
+1. `db` starts PostgreSQL and passes its healthcheck.
+2. `ingestion` loads `reshaped_laws.json` into the `laws` and `articles` tables (truncate-and-reload, so it is safe to re-run).
+3. `transform` waits for ingestion to finish, then normalizes every article and writes the `articles_clean` table. Raw tables are never modified.
 
-After exploring the data and what are it is wrong and what is missing we started in data normalization we use pytest to check the code 
-works or not 
-
-run the tests using ```uv run pytest``` in the Terminal
-
----
-
-### Finished
-1. Docker for db 
-2. reshaping data 
-3. ingest data to the database
-4. Dockrize the ingestion file
-5. Data Exploration
-5. Data Normalization
-
-
-Start the Transformation
-
-
----
-
-### problems Fixed :
-1. Drop empty articles
-2. sqlalchemy.exc.NoSuchModuleError: Can't load plugin: sqlalchemy.dialects:postgresql.psycopg
-3. Fixed schema
-
-
-
-### problems:
-
-Smaller things to fix in the ingestion file:
-
-**Move secrets and paths out of the code**. Read the password and path from 
-environment variables (or a .env file), because root:yoyo and a Desktop path make the script neither universal nor safe to commit. In a raw stringr"C:\\Users..." also keeps the double backslashes literally. Use r"C:\Users..." or pathlib.
+Run the Arabic text tests:
+ 
+```bash
+cd transform
+uv run pytest
+```
 
 
-**Wrap it in a main()** function with the path as an argument. That’s the cheapest step toward “universal” and makes it callable from Airflow later.
+Architecture
+
+![Archeticture](Archeticture.jpg)
+
+
+| Layer | Purpose | Tables / files |
+|---|---|---|
+| Raw | Data exactly as collected | `laws`, `articles` |
+| Clean | Normalized Arabic text | `articles_clean` |
+| Gold | Metrics ready for the dashboard | `TODO` |
+
+## Data Sources
+ 
+- **[Manshurat Qanuniya](https://manshurat.org)**: open-access Arabic legal database run by the Law and Society Research Unit at the American University in Cairo.
+
+## Planned Metrics
+ 
+| # | Metric | What it answers |
+|---|---|---|
+| 1 | Structure tracker | How many articles and chapters does each version have, and how long is the average article? |
+| 2 | Legislative instability index | Which laws are amended most often and by how much text? |
+| 3 | Sentence length and density | Is legal language getting denser over time? |
+| 4 | New terminology log | Which legal terms appear for the first time in each amendment? |
+| 5 | Cross-domain comparison | How does the language of the Constitution compare with the Labor Law and the Penal Code at the same point in time? |
+
+
+## Project Status
+ 
+| Stage | Status |
+|---|---|
+| Ingestion (JSON to PostgreSQL) | Done |
+| Arabic normalization (`articles_clean`) | Done |
+| Article splitter | Next |
+| Metrics computation | Planned |
+| Airflow orchestration | Planned |
+| Dashboard (Streamlit) | Planned |
+| Cloud deployment (Hugging Face) | Planned, last step |
