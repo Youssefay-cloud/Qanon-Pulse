@@ -26,6 +26,7 @@ run the tests using ```uv run pytest``` in the Terminal
 4. Dockrize the ingestion file
 5. Data Exploration
 5. Data Normalization
+6. Transfromation
 
 
 Start the Transformation
@@ -49,3 +50,23 @@ environment variables (or a .env file), because root:yoyo and a Desktop path mak
 
 
 **Wrap it in a main()** function with the path as an argument. That’s the cheapest step toward “universal” and makes it callable from Airflow later.
+
+
+
+## Known limitations in Transformation
+
+- **Coverage:** metrics currently cover 5 of the 10 laws in the database.
+  Four laws (174, 143, 94, 4746) have no article text loaded yet.
+- **Law 258 of 2024** is excluded: its PDF text layer is reversed
+  (needs re-extraction with OCR).
+- **Amending decrees** (e.g. 1120 of 2024) quote articles of the text they
+  amend, and those quotes are counted as articles.
+- **Article splitting is rule-based:** a reference such as "المادة 143 من هذا
+  القانون" is skipped as a heading. A real heading followed by "من" on the same
+  line would be missed.
+- **Lexical diversity (TTR)** falls as texts get longer, so compare documents
+  of similar size only.
+- **Sentence length** counts clauses, because the Arabic semicolon (؛) ends a unit.
+- **Term density** uses a short list of 15 general terms; it is an indicator,
+  not a complete measure of legal vocabulary.
+- With 5 documents, results are indicators, not statistical conclusions.
