@@ -52,7 +52,11 @@ services:
     build: 
       context: .
       dockerfile: transform/Dockerfile
-    command: python -m transform.clean_articles
+    command: >
+      sh -c "python -m transform.split_articles &&
+             python -m transform.metrics_structure &&
+             python -m transform.metrics_text &&
+             python -m transform.metrics_terms"
     environment:
       - DATABASE_URL=postgresql+psycopg2://root:yoyo@db:5432/qanon_db
     depends_on:
