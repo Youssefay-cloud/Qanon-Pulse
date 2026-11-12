@@ -46,6 +46,7 @@ services:
     depends_on:
       db :
         condition: service_healthy
+    profiles: ["manual"]    
 
   
   transform:
@@ -64,6 +65,9 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./transform:/code/transform
+    profiles: ["manual"]    
+
+
 
   dashboard:
     build:
@@ -71,11 +75,31 @@ services:
       dockerfile: dashboard/Dockerfile
     ports:
       - "8501:8501"
+    volumes:
+      - ./dashboard/data:/code/dashboard/data
+
+
+  airflow:
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+    command: airflow standalone
+    ports:
+      - "8081:8080"
     environment:
-      - DATABASE_URL=postgresql+psycopg2://root:yoyo@db:5432/qanon_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "True"
+      DATABASE_URL: postgresql+psycopg2://root:yoyo@db:5432/qanon_db
+      DATA_FILE_PATH: /data/reshaped_laws.json
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./transform:/home/airflow/project/transform
+      - ./ingestion:/home/airflow/project/ingestion
+      - ./data:/data
+      - ./dashboard/data:/home/airflow/project/dashboard/data
     depends_on:
-      transform:
-        condition: service_completed_successfully
+      db:
+        condition: service_healthy
 
 # Clean, default volumes
 volumes:
