@@ -64,6 +64,19 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./transform:/code/transform
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://root:yoyo@db:5432/qanon_db
+    depends_on:
+      transform:
+        condition: service_completed_successfully
+
 # Clean, default volumes
 volumes:
   postgres_data:
