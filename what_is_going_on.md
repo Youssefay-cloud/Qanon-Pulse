@@ -26,7 +26,12 @@ run the tests using ```uv run pytest``` in the Terminal
 4. Dockrize the ingestion file
 5. Data Exploration
 5. Data Normalization
-6. Transfromation
+6. Transfromation 
+    - Raw tables (laws, articles)
+    - The normalizer, with tests
+    - The article splitter, with tests, checked against your real data
+    - Three metrics tables with (law_number, year) keys
+    - Everything running in one command through Docker Compose
 
 
 Start the Transformation
