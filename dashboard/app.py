@@ -1,29 +1,27 @@
-import os
-import plotly.express as px
+from pathlib import Path
+
 import pandas as pd
+import plotly.express as px
 import streamlit as st
-from sqlalchemy import create_engine
 
 st.set_page_config(page_title="Qanun Pulse", layout="wide")
 
+DATA_PATH = Path(__file__).parent / "data" / "metrics.csv"
 
-@st.cache_data
+
+@st.cache_data(ttl=300)
 def load_data() -> pd.DataFrame:
-    engine = create_engine(os.environ["DATABASE_URL"])
-    keys = ["law_number", "year"]
-
-    df = pd.read_sql("SELECT * FROM metrics_structure", engine)
-    for table in ["metrics_text", "metrics_terms"]:
-        df = df.merge(pd.read_sql(f"SELECT * FROM {table}", engine), on=keys)
-
-    laws = pd.read_sql("SELECT law_number, year, title, category FROM laws", engine)
-    return df.merge(laws, on=keys)
+    return pd.read_csv(DATA_PATH)
 
 
 st.title("Qanun Pulse")
 st.caption("Egyptian legislation: text metrics per law")
 
-df = load_data()
+try:
+    df = load_data()
+except Exception:
+    st.error("No metrics file yet. Run the pipeline in Airflow (http://localhost:8081), then refresh.")
+    st.stop()
 
 categories = sorted(df["category"].unique())
 selected = st.sidebar.multiselect("Document type", categories, default=categories)
@@ -50,7 +48,7 @@ fig = px.bar(
 st.plotly_chart(fig)
 
 with st.expander("Show data table"):
-    # Segmentation fault with the st.dataframe() method, so using st.write() instead.
+    # st.dataframe() crashed (segmentation fault) on this setup, so st.write() is used instead.
     st.write(df)
 
 with st.expander("About these metrics"):
