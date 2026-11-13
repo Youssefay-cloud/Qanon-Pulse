@@ -77,3 +77,61 @@ Architecture
 | Airflow orchestration | Planned |
 | Dashboard (Streamlit) | Planned |
 | Cloud deployment (Hugging Face) | Planned, last step |
+
+
+
+## Cloud commands used 
+
+Installation : 
+`winget install -e --id Microsoft.AzureCLI`
+
+Checking:
+`az --version`
+
+`az login`
+
+`az account show --query "{name:name, state:state}"`
+
+Then I made a cost management with 20 dollar with alert when reached 16 dollars.
+
+
+Register the services: \
+`az provider register --namespace Microsoft.App`\
+`az provider register --namespace Microsoft.OperationalInsights`\
+`az provider register --namespace Microsoft.ContainerRegistry`\
+`az provider register --namespace Microsoft.DBforPostgreSQL`
+
+Checking Progress (registering -> Registered):\
+`az provider show --namespace Microsoft.App --query registrationState`\
+`az provider show --namespace Microsoft.DBforPostgreSQL --query registrationState`
+
+Create the resource group:\
+`az group create --name qanun-pulse-rg --location germanywestcentral`/
+Then Verify it with : \
+`az group show --name qanun-pulse-rg --query "{name:name, location:location}"`
+
+Then Login : 
+`az acr login --name qanunpulseyoussef`
+
+now we push the dashboard : \
+`docker tag qanunpulse-dashboard:latest qanunpulseyoussef.azurecr.io/dashboard:v1` 
+
+check the arrival : `az acr repository show-tags --name qanunpulseyoussef --repository dashboard -o table`
+
+add the container app extension : \
+`az extension add --name containerapp --upgrade`
+
+Create the environment: \
+`az containerapp env create --name qanun-env --resource-group qanun-pulse-rg --location germanywestcentral`
+
+Allow the app to pull from your registry: \
+`az acr update --name qanunpulseyoussef --admin-enabled true`
+
+Create the app: \
+`az containerapp create --name qanun-dashboard --resource-group qanun-pulse-rg --environment qanun-env --image qanunpulseyoussef.azurecr.io/dashboard:v1 --registry-server qanunpulseyoussef.azurecr.io --registry-username qanunpulseyoussef --registry-password $(az acr credential show --name qanunpulseyoussef --query "passwords[0].value" -o tsv) --target-port 8501 --ingress external --cpu 0.25 --memory 0.5Gi --min-replicas 0 --max-replicas 1`
+
+Get the URL: \
+`az containerapp show --name qanun-dashboard --resource-group qanun-pulse-rg --query properties.configuration.ingress.fqdn -o tsv`
+
+
+
