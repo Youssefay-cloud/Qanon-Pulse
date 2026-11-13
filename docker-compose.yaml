@@ -1,11 +1,12 @@
 services:
   db:
+    profiles: ["local"]
     container_name: qanonpulse_db
     image: postgres:18
     restart: unless-stopped
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: yoyo
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       POSTGRES_DB: qanon_db
       PGDATA: /var/lib/postgresql/data
     volumes:
@@ -13,13 +14,14 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d qanon_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-root} -d qanon_db"]
       interval: 3s
       timeout: 3s
       retries: 10
 
 
   pgadmin:
+    profiles: ["local"]
     image: dpage/pgadmin4:9
     container_name: qanonpulse_pgadmin
     restart: unless-stopped
@@ -40,12 +42,13 @@ services:
       dockerfile: ingestion/Dockerfile
     environment:
       - DATA_FILE_PATH=/data/reshaped_laws.json
-      - DATABASE_URL=postgresql+psycopg2://root:yoyo@db:5432/qanon_db
+      - DATABASE_URL=${DATABASE_URL}
     volumes:
       - ./data:/data
     depends_on:
       db :
         condition: service_healthy
+        required: false
     profiles: ["manual"]    
 
   
@@ -59,7 +62,7 @@ services:
              python -m transform.metrics_text &&
              python -m transform.metrics_terms"
     environment:
-      - DATABASE_URL=postgresql+psycopg2://root:yoyo@db:5432/qanon_db
+      - DATABASE_URL=${DATABASE_URL}
     depends_on:
       ingestion:
         condition: service_completed_successfully
@@ -89,7 +92,7 @@ services:
     environment:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "True"
-      DATABASE_URL: postgresql+psycopg2://root:yoyo@db:5432/qanon_db
+      DATABASE_URL: ${DATABASE_URL}
       DATA_FILE_PATH: /data/reshaped_laws.json
     volumes:
       - ./airflow/dags:/opt/airflow/dags
@@ -100,6 +103,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+        required: false
 
 # Clean, default volumes
 volumes:

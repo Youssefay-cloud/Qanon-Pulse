@@ -7,7 +7,7 @@ import os
 
 # 1. Load paths from environment variables (with local fallbacks for testing outside Docker)
 data_path = os.getenv("DATA_FILE_PATH", r"C:\Users\Forsan\Desktop\Qanun Pulse\data\reshaped_laws.json")
-db_url = os.getenv("DATABASE_URL", "postgresql+psycopg2://root:yoyo@localhost:5432/qanon_db")
+db_url = os.environ["DATABASE_URL"]
 
 print(f"📂 Loading data from: {data_path}")
 df = pd.read_json(data_path)
