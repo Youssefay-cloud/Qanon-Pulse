@@ -104,18 +104,20 @@ services:
       db:
         condition: service_healthy
         required: false
-<<<<<<< HEAD
-=======
     
   llm:
-    build:
-      context: .
-      dockerfile: llm.Dockerfile
+    image: ghcr.io/ggml-org/llama.cpp:server
     container_name: qanonpulse_llm
     restart: unless-stopped
     ports:
       - "8080:8080"
->>>>>>> b76a4a8 (Add env-based config, Airflow pipeline and Azure cloud edition)
+    volumes:
+      - ./models:/models
+    command: >
+      -m /models/Qwen3.5-0.8B-Q4_0.gguf 
+      --host 0.0.0.0 
+      --port 8080 
+      -c 4096
 
 # Clean, default volumes
 volumes:
