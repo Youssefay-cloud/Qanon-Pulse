@@ -17,3 +17,7 @@ wheels/
 .env.local
 .env.cloud
 .ipynb_checkpoints/
+<<<<<<< HEAD
+=======
+.gguf
+>>>>>>> b76a4a8 (Add env-based config, Airflow pipeline and Azure cloud edition)

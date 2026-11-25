@@ -104,6 +104,18 @@ services:
       db:
         condition: service_healthy
         required: false
+<<<<<<< HEAD
+=======
+    
+  llm:
+    build:
+      context: .
+      dockerfile: llm.Dockerfile
+    container_name: qanonpulse_llm
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+>>>>>>> b76a4a8 (Add env-based config, Airflow pipeline and Azure cloud edition)
 
 # Clean, default volumes
 volumes:
